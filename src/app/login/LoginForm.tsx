@@ -3,6 +3,7 @@
 import {  useState } from "react";
 import { Form, Input, Button, Card, Typography } from "antd";
 import { useRouter } from "next/navigation";
+import validations from "../utils/validations";
 
 const { Link, Title } = Typography;
 
@@ -43,20 +44,14 @@ export default function LoginForm() {
           <Form.Item
             label="Email"
             name="email"
-            rules={[
-              { required: true, message: "Please input your email!" },
-              { type: "email", message: "Enter a valid email" },
-            ]}
+            rules={validations.email}
           >
             <Input placeholder="Enter email" />
           </Form.Item>
           <Form.Item
             label="Password"
             name="password"
-            rules={[
-              { required: true, message: "Please input your password!" },
-              { min: 8, message: "Password must be at least 8 characters" },
-            ]}
+            rules={validations.password}
           >
             <Input.Password placeholder="Enter password" />
           </Form.Item>
