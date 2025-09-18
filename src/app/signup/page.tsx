@@ -1,9 +1,11 @@
 "use client";
 
-import { Form, Input, Button, Card, Typography, message } from "antd";
+import { Form, Input, Button, Card, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import validations from "@/app/utils/validations";
+import config from "../../../config";
+
 
 const { Title } = Typography;
 
@@ -24,12 +26,12 @@ export default function SignupPage() {
   const signUp = async (formData: SignupFormData) => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3001/users", {
+      const response = await fetch(`${config.apiUrl}/users/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        //credentials: "include",
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
 

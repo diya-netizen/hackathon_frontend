@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import type { ColumnsType } from "antd/es/table";
 import validations from "@/app/utils/validations";
 import { useRouter } from "next/navigation";
+import config from "../../../config";
+
 
 const { Title, Text, Link } = Typography;
 
@@ -35,7 +37,7 @@ export default function UsersPage() {
 
   const fetchMyUser = async () => {
     try{
-      const res = await fetch('http://localhost:3001/auth/me', {
+      const res = await fetch(`${config.apiUrl}/auth/me`, {
         credentials: 'include',
       });
       const data = await res.json();
@@ -52,7 +54,7 @@ export default function UsersPage() {
   const fetchUsers = async (page = 1) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/users?page=${page}&limit=${pageSize}`, {
+      const res = await fetch(`${config.apiUrl}/users?page=${page}&limit=${pageSize}`, {
         credentials: 'include',
       });
 
@@ -76,7 +78,7 @@ export default function UsersPage() {
 
     const updateAccount = async (values: Partial<User>) => {
     try {
-      const res = await fetch(`http://localhost:3001/users/${values.id}`, {
+      const res = await fetch(`${config.apiUrl}/users/${values.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -102,7 +104,7 @@ export default function UsersPage() {
 
   const handleDelete = async (id: number) => {
     try {
-      const res = await fetch(`http://localhost:3001/users/${id}`, {
+      const res = await fetch(`${config.apiUrl}/users/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -121,7 +123,7 @@ export default function UsersPage() {
 
   const handleLogout = async () => {
       try {
-      const res = await fetch(`http://localhost:3001/auth/logout`, {
+      const res = await fetch(`${config.apiUrl}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });

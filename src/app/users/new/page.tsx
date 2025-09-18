@@ -4,6 +4,8 @@ import { Form, Input, Button, Card, Typography, Select } from "antd";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import validations from "@/app/utils/validations";
+import config from "../../../../config";
+
 
 const { Title } = Typography;
 
@@ -13,12 +15,12 @@ export default function NewUserPage() {
 
   const newUser = async (formData: any) => {
     try {
-      const response = await fetch("http://localhost:3001/users", {
+      const response = await fetch(`${config.apiUrl}/users/createUser`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        //credentials: "include",
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
 

@@ -4,6 +4,7 @@ import {  useState } from "react";
 import { Form, Input, Button, Card, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import validations from "../utils/validations";
+import config from "../../../config";
 
 const { Link, Title } = Typography;
 
@@ -13,7 +14,8 @@ export default function LoginForm() {
   const [errorText, seterrorText] = useState("");
 
   const login = async (values: any) => {
-    const res = await fetch('http://localhost:3001/auth/login', {
+    try{
+    const res = await fetch(`${config.apiUrl}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -32,6 +34,9 @@ export default function LoginForm() {
       const error = await res.json();
       console.error('Login failed:', error.message);
     }
+  } catch (error) {
+    console.error('An error occurred:', error);
+          } 
   }; 
 
   return (
