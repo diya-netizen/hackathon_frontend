@@ -1,11 +1,12 @@
 "use client";
 
-import { Table, Button, Tag, Space, Typography, message, Card, Select, Avatar, Form, Modal, Input, Spin } from "antd";
-import { useEffect, useState } from "react";
+import { Table, Button, Tag, Space, Typography, message, Card, Select, Avatar, Form, Modal, Input, Spin, Row, Col } from "antd";
+import { useEffect, useState, useMemo } from "react";
 import type { ColumnsType } from "antd/es/table";
 import validations from "@/app/utils/validations";
 import { useRouter } from "next/navigation";
 import config from "../../../config";
+import {SearchOutlined} from '@ant-design/icons';
 
 
 const { Title, Text, Link } = Typography;
@@ -29,11 +30,14 @@ export default function UsersPage() {
   const pageSize = 10;
   const router = useRouter();
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [filterText, setFilterText] = useState("");
+  const [field, setField] = useState<"no_filter" | "email" | "phone">("no_filter");
   
+
   useEffect(() => {
     fetchMyUser();
     fetchUsers(1);
-  }, []);
+  }, [field]);
 
   const fetchMyUser = async () => {
     try{
@@ -51,25 +55,35 @@ export default function UsersPage() {
     }
   };
 
-  const fetchUsers = async (page = 1) => {
+  const fetchUsers = async (page = 1, searchValue = filterText, searchField = field) => {
     setLoading(true);
     try {
-      const res = await fetch(`${config.apiUrl}/users?page=${page}&limit=${pageSize}`, {
-        credentials: 'include',
-      });
-
-      if (!res.ok) throw new Error('Request failed');
-
-      const data = await res.json();
-      
+      if (searchValue === "" || searchField === "no_filter") {
+        const res = await fetch(`${config.apiUrl}/users?page=${page}&limit=10`, {
+          credentials: "include",
+        });
+        const data = await res.json();
         setUsers(data.users);
         setTotal(data.total);
         setCurrentPage(data.page);
-      
+        return;
+      }
+
+      const res = await fetch(
+        `${config.apiUrl}/users?page=${page}&limit=10&field=${searchField}&search=${encodeURIComponent(
+          searchValue
+        )}`,
+        { credentials: "include" }
+      );
+      const data = await res.json();
+      setUsers(data.users);
+      setTotal(data.total);
+      setCurrentPage(data.page);
     } catch (error) {
-      message.error('Failed to load users');
+      message.error("Failed to load users");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const removeUser = (idToRemove: User["id"]) => {
@@ -223,12 +237,48 @@ export default function UsersPage() {
       <Card style={{ marginTop: '20px' }}>
         <div style={{ marginBottom: 16 }}>
         {myUser?.role.toUpperCase() === 'ADMIN' && (
-            <Link href="/users/new">
-            <Button type="primary" >New User</Button> 
-          
-            </Link>
+          <Row gutter={16} style={{ marginBottom: '20px' }}>
+            <Col>
+              <Link href="/users/new">
+                <Button type="primary" >New User</Button> 
+              </Link>
+            </Col>
+            <Col>
+              <Select
+                value={field}
+                style={{ width: 140 }}
+                options={[
+                  { value: "no_filter", label: "All"},
+                  { value: "email", label: "Email" },
+                  { value: "phone", label: "Phone" },
+                ]}
+                onChange={(v) => setField(v)}
+              />
+            </Col>
+
+            <Col>
+              <Input
+                allowClear
+                placeholder={
+                  field === "phone"
+                    ? "Search phone…"
+                    : field === "email"
+                    ? "Search email…"
+                    : "Showing all users.."
+                }
+                disabled={field === "no_filter"}
+                prefix={<SearchOutlined />}
+                style={{ width: 260 }}
+                value={filterText}
+                onChange={(e) => {
+                  setFilterText(e.target.value);
+                  fetchUsers(1, e.target.value, field); 
+                }}
+              />
+            </Col>
+          </Row>  
         )}
-        </div>
+      </div>
         <Spin spinning={loading} size="large">
         <Table
           rowKey="id"
@@ -238,7 +288,7 @@ export default function UsersPage() {
             current: currentPage,
             pageSize,
             total,
-            onChange: (page) => fetchUsers(page),
+            onChange: (page) => fetchUsers(page, filterText, field),
             position: ['bottomCenter'],
           }}
         />
